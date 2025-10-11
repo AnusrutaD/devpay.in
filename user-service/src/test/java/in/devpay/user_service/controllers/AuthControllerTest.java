@@ -94,6 +94,6 @@ public class AuthControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("User is already exist"));
+                .andExpect(content().string("User already exist"));
     }
 }
