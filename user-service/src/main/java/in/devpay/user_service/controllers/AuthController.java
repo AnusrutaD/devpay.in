@@ -36,7 +36,7 @@ public class AuthController {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()){
             log.error("User is already exist");
-            return ResponseEntity.badRequest().body("User is already exist");
+            return ResponseEntity.badRequest().body("User already exist");
         }
 
         request.setPassword(passwordEncoder.encode(request.getPassword()));
