@@ -8,8 +8,6 @@ import in.devpay.user_service.repositories.UserRepository;
 import in.devpay.user_service.utils.JWTUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +46,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request){
         log.info("Received request for login");
-        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+        Optional<User> existingUser = userRepository.findByLogin(request.getLogin());
         if (existingUser.isEmpty()){
             log.error("User not found");
             return ResponseEntity.status(401).body("User not found");

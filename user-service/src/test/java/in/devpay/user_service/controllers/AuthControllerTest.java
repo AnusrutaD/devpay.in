@@ -119,7 +119,7 @@ public class AuthControllerTest {
     @Test
     public void testLogin_Success() throws Exception {
         LoginRequest request = LoginRequest.builder()
-                .email("test@example.com")
+                .login("test@example.com")
                 .password("password123")
                 .build();
 
@@ -131,7 +131,7 @@ public class AuthControllerTest {
                 .password("encodedPass")
                 .build();
 
-        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByLogin(request.getLogin())).thenReturn(Optional.of(existingUser));
         when(passwordEncoder.matches(request.getPassword(), existingUser.getPassword())).thenReturn(true);
         when(jwtUtil.generateToken(any(), any())).thenReturn("dummyJwtToken");
 
@@ -145,11 +145,11 @@ public class AuthControllerTest {
     @Test
     public void testLogin_UserNotFound() throws Exception {
         LoginRequest request = LoginRequest.builder()
-                .email("test@example.com")
+                .login("test@example.com")
                 .password("password123")
                 .build();
 
-        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByLogin(request.getLogin())).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +161,7 @@ public class AuthControllerTest {
     @Test
     public void testLogin_InvalidPassword() throws Exception {
         LoginRequest request = LoginRequest.builder()
-                .email("test@example.com")
+                .login("test@example.com")
                 .password("wrongPassword")
                 .build();
 
@@ -173,7 +173,7 @@ public class AuthControllerTest {
                 .password("encodedPass")
                 .build();
 
-        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByLogin(request.getLogin())).thenReturn(Optional.of(existingUser));
         when(passwordEncoder.matches(request.getPassword(), existingUser.getPassword())).thenReturn(false);
 
         mockMvc.perform(post("/auth/login")
@@ -186,7 +186,7 @@ public class AuthControllerTest {
     @Test
     public void testLogin_Success_VerifyClaims() throws Exception {
         LoginRequest request = LoginRequest.builder()
-                .email("test@example.com")
+                .login("test@example.com")
                 .password("password123")
                 .build();
 
@@ -199,7 +199,7 @@ public class AuthControllerTest {
                 .role(UserRole.USER)
                 .build();
 
-        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByLogin(request.getLogin())).thenReturn(Optional.of(existingUser));
         when(passwordEncoder.matches(request.getPassword(), existingUser.getPassword())).thenReturn(true);
         when(jwtUtil.generateToken(any(), any())).thenReturn("dummyJwtToken");
 
