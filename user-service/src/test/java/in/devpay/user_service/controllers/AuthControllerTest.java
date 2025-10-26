@@ -70,7 +70,7 @@ public class AuthControllerTest {
                         .content("""
                                 {
                                     "firstName": "Test",
-                                    "lastName": "User"
+                                    "lastName": "User",
                                     "phone": "9876543210",
                                     "email": "test@example.com",
                                     "password": "password123"
@@ -106,7 +106,7 @@ public class AuthControllerTest {
                         .content("""
                                 {
                                     "firstName": "Test",
-                                    "lastName": "User"
+                                    "lastName": "User",
                                     "phone": "9876543210",
                                     "email": "test@example.com",
                                     "password": "password123"

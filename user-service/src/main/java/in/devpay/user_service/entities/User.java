@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Data
@@ -26,7 +27,7 @@ public class User {
 
     private String lastName;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String username;
 
     @Column(unique = true, nullable = false)
@@ -47,7 +48,14 @@ public class User {
             this.id = UUID.randomUUID();
         }
         if (this.username == null || this.username.isEmpty()) {
-            this.username = (this.firstName.toLowerCase() + "_" + this.id.toString().substring(0, 8));
+            String base = (this.firstName != null && this.firstName.isBlank()) ? this.firstName: "user";
+            String sanitized = base.trim()
+                    .toLowerCase(Locale.ROOT)
+                    .replaceAll("[^a-z0-9]+", "");
+            if (sanitized.isEmpty()) {
+                sanitized = "user";
+            }
+            this.username = sanitized + "_" + this.id.toString().substring(0, 8);
         }
     }
 
