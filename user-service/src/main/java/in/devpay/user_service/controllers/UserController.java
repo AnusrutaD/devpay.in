@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -31,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetUserResponse> getUserById(@PathVariable Long id){
+    public ResponseEntity<GetUserResponse> getUserById(@PathVariable UUID id){
         log.info("Requested for get user with id: " + id);
         return service.getUserById(id).map(value ->
                 ResponseEntity.status(HttpStatus.OK)

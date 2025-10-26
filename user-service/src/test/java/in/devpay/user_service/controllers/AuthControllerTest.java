@@ -53,7 +53,9 @@ public class AuthControllerTest {
     @Test
     public void testSignup_Success() throws Exception {
         SignupRequest request = SignupRequest.builder()
-                .name("Test User")
+                .firstName("Test")
+                .lastName("User")
+                .phone("9876543210")
                 .email("test@example.com")
                 .password("password123")
                 .build();
@@ -67,7 +69,9 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "name": "Test User",
+                                    "firstName": "Test",
+                                    "lastName": "User"
+                                    "phone": "9876543210",
                                     "email": "test@example.com",
                                     "password": "password123"
                                 }
@@ -79,13 +83,17 @@ public class AuthControllerTest {
     @Test
     public void testSignup_UserAlreadyExists() throws Exception {
         SignupRequest request = SignupRequest.builder()
-                .name("Test User")
+                .firstName("Test")
+                .lastName("User")
+                .phone("9876543210")
                 .email("test@example.com")
                 .password("password123")
                 .build();
 
         User existingUser = User.builder()
-                .name("Test User")
+                .firstName("Test")
+                .lastName("User")
+                .phone("9876543210")
                 .email("test@example.com")
                 .password("password123")
                 .build();
@@ -97,7 +105,9 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "name": "Test User",
+                                    "firstName": "Test",
+                                    "lastName": "User"
+                                    "phone": "9876543210",
                                     "email": "test@example.com",
                                     "password": "password123"
                                 }
@@ -114,7 +124,9 @@ public class AuthControllerTest {
                 .build();
 
         User existingUser = User.builder()
-                .name("Test User")
+                .firstName("Test")
+                .lastName("User")
+                .phone("9876543210")
                 .email("test@example.com")
                 .password("encodedPass")
                 .build();
@@ -154,7 +166,9 @@ public class AuthControllerTest {
                 .build();
 
         User existingUser = User.builder()
-                .name("Test User")
+                .firstName("Test")
+                .lastName("User")
+                .phone("9876543210")
                 .email("test@example.com")
                 .password("encodedPass")
                 .build();
@@ -177,7 +191,9 @@ public class AuthControllerTest {
                 .build();
 
         User existingUser = User.builder()
-                .name("Test User")
+                .firstName("Test")
+                .lastName("User")
+                .phone("9876543210")
                 .email("test@example.com")
                 .password("encodedPass")
                 .role(UserRole.USER)
