@@ -1,6 +1,7 @@
 package in.devpay.user_service.dtos;
 
 import in.devpay.user_service.entities.User;
+import in.devpay.user_service.entities.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -24,6 +25,8 @@ public class CreateUserRequest {
     @Email
     private String email;
 
+    private UserRole role;
+
     @NotBlank(message = "Password is required")
     private String password;
 
@@ -34,6 +37,7 @@ public class CreateUserRequest {
                 .lastName(this.lastName)
                 .phone(this.phone)
                 .email(this.email)
+                .role(this.role)
                 .password(this.password)
                 .build();
     }

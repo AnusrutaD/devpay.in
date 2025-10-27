@@ -19,7 +19,7 @@ import java.util.UUID;
 @Table(name = "app_user")
 public class User {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -40,22 +40,25 @@ public class User {
     private String password;
 
     @Enumerated(value = EnumType.STRING)
-    private UserRole role = UserRole.USER;
+    private UserRole role;
 
     @PrePersist
-    public void generateUsername(){
-        if (this.id == null) {
-            this.id = UUID.randomUUID();
+    public void generateUsernameAndSetUserRole(){
+
+        if (this.role == null){
+            this.role = UserRole.USER;
         }
+
         if (this.username == null || this.username.isEmpty()) {
-            String base = (this.firstName != null && this.firstName.isBlank()) ? this.firstName: "user";
+            String base = (this.firstName == null || this.firstName.isBlank()) ? "user" : this.firstName;
             String sanitized = base.trim()
                     .toLowerCase(Locale.ROOT)
                     .replaceAll("[^a-z0-9]+", "");
             if (sanitized.isEmpty()) {
                 sanitized = "user";
             }
-            this.username = sanitized + "_" + this.id.toString().substring(0, 8);
+            String suffix = (this.id != null ? this.id : UUID.randomUUID()).toString().substring(0, 8);
+            this.username = sanitized + "_" + suffix;
         }
     }
 
