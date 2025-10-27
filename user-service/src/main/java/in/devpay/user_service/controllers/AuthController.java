@@ -6,6 +6,7 @@ import in.devpay.user_service.dtos.SignupRequest;
 import in.devpay.user_service.entities.User;
 import in.devpay.user_service.repositories.UserRepository;
 import in.devpay.user_service.utils.JWTUtil;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,17 +30,24 @@ public class AuthController {
     private final JWTUtil jwtUtil;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignupRequest request){
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request){
         log.info("Received request for signup");
+
+        Map<String, String> errors = new HashMap<>();
 
         if (userRepository.existsByEmail(request.getEmail())){
             log.error("Email is already exist");
-            return ResponseEntity.badRequest().body("Email is already exist");
+            errors.put("email", "Email already exists");
         }
 
         if (userRepository.existsByPhone(request.getPhone())){
             log.error("Phone is already exist");
-            return ResponseEntity.badRequest().body("Phone is already exist");
+            errors.put("phone", "Phone already exists");
+        }
+
+        if (!errors.isEmpty()){
+                log.error("Signup validation failed: {}", errors);
+                return ResponseEntity.badRequest().body(errors);
         }
 
         request.setPassword(passwordEncoder.encode(request.getPassword()));

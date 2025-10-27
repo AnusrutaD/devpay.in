@@ -57,7 +57,7 @@ public class User {
             if (sanitized.isEmpty()) {
                 sanitized = "user";
             }
-            String suffix = (this.id != null ? this.id : UUID.randomUUID()).toString().substring(0, 8);
+            String suffix = this.id.toString().substring(0, 8);
             this.username = sanitized + "_" + suffix;
         }
     }
