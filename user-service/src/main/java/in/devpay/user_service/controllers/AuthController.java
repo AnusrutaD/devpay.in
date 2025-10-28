@@ -23,7 +23,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,12 +36,12 @@ public class AuthController {
         Map<String, String> errors = new HashMap<>();
 
         if (userRepository.existsByEmail(request.getEmail())){
-            log.error("Email is already exist");
+            log.error("Email already exist");
             errors.put("email", "Email already exists");
         }
 
         if (userRepository.existsByPhone(request.getPhone())){
-            log.error("Phone is already exist");
+            log.error("Phone already exist");
             errors.put("phone", "Phone already exists");
         }
 
@@ -57,7 +57,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request){
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request){
         log.info("Received request for login");
         Optional<User> existingUser = userRepository.findByLogin(request.getLogin());
         if (existingUser.isEmpty()){
