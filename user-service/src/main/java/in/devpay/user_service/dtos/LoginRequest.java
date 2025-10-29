@@ -1,11 +1,16 @@
 package in.devpay.user_service.dtos;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
 public class LoginRequest {
-    private String email;
+
+    @NotBlank
+    private String login;
+
+    @NotBlank
     private String password;
 }

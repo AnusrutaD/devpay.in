@@ -1,81 +1,69 @@
 package in.devpay.user_service.utils;
 
+import in.devpay.user_service.services.DevpayUserDetailService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import java.util.List;
 
 import java.io.IOException;
 
+@AllArgsConstructor
+@Slf4j
 @Component
 public class JWTRequestFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
 
-    protected JWTRequestFilter(JWTUtil jwtUtil){
-        this.jwtUtil = jwtUtil;
-    }
+    private DevpayUserDetailService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String authorizationHeader = request.getHeader("Authorization");
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+        log.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
+        try {
+            String jwt = parseJwt(request);
 
-        String username = null;
-        String jwt = null;
+            if (jwt != null && jwtUtil.validateToken(jwt)) {
+                String username = jwtUtil.getUsernameFromJwtToken(jwt);
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-            jwt = authorizationHeader.substring(7);
-            try {
-                username = jwtUtil.extractUsername(jwt);
-            }
-            catch (Exception e){
-                // log
-            }
-        }
+                DevpayUserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            if(jwtUtil.validateToken(jwt, username)){
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null, null);
+                UsernamePasswordAuthenticationToken authToken = new
+                        UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                log.debug("Roles for JWT: {}", userDetails.getAuthorities());
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-            jwt = authorizationHeader.substring(7);
-            if (jwt == null || jwt.isBlank()){
-                filterChain.doFilter(request, response);
-                return;
-            }
-            try {
-                username = jwtUtil.extractUsername(jwt);
-                String role = jwtUtil.extractRole(jwt);
-
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        List.of(new SimpleGrantedAuthority(role))
-                );
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                filterChain.doFilter(request, response);
-            }
-            catch (Exception e){
-
-            }
+        catch (Exception e) {
+            log.error("Cannot set user authentication: {}", e.getMessage());
         }
-        else {
-            filterChain.doFilter(request, response);
-            return;
-        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private String parseJwt(HttpServletRequest request) {
+        String jwt = jwtUtil.getJwtFromHeader(request);
+        log.debug("JWT: {}", jwt);
+        return jwt;
     }
 }

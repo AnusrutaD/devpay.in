@@ -10,9 +10,11 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -30,15 +32,18 @@ public class UserController {
                 .body(service.createUser(request.toUser()).toGetResponse());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GetUserResponse> getUserById(@PathVariable Long id){
-        log.info("Requested for get user with id: " + id);
-        return service.getUserById(id).map(value ->
+    @GetMapping("/{username}")
+    public ResponseEntity<GetUserResponse> getUserById(@PathVariable String username){
+        log.info("Requested for get user with username: " + username);
+        return service.getUserByUsername(username).map(value ->
                 ResponseEntity.status(HttpStatus.OK)
                         .body(value.toGetResponse()))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all/")
     public ResponseEntity<List<GetUserResponse>> getAllUsers(){
         log.info("Requested for get all users");

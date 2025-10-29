@@ -1,67 +1,86 @@
 package in.devpay.user_service.utils;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
-import java.util.Map;
 
+@Slf4j
 @Component
 public class JWTUtil {
-    private static final String SECRET = "gdxsfgqaswfqywfuyhjcgxfwyasrdytqwredug";
 
-    private Key getSignedKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
-    }
+    @Value("${spring.application.secret}")
+    private String secret;
 
-    public String extractEmail(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignedKey())
-                .build()
-                .parseClaimsJwt(token)
-                .getBody()
-                .getSubject();
-    }
+    @Value("${spring.application.expiration}")
+    private Long expiration;
 
-    public boolean validateToken(String token, String userName){
-        try {
-            extractEmail(token);
-            return true;
+    public String getJwtFromHeader(HttpServletRequest request){
+        String authorizationHeader = request.getHeader("Authorization");
+
+        log.debug("Authorization Header: {}", authorizationHeader);
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
         }
-        catch (Exception e){
-            return false;
-        }
+
+        log.error("Authentication failed");
+        return  null;
     }
 
-    public String extractUsername(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignedKey())
-                .build()
-                .parseClaimsJwt(token)
-                .getBody()
-                .getSubject();
-    }
+    public String generateTokenFromUsername(DevpayUserDetails userDetails) {
+        String username = userDetails.getUsername();
 
-    public String generateToken(Map<String, Object> claims, String email){
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
-                .signWith(getSignedKey(), SignatureAlgorithm.HS256)
+                .subject(username)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignedKey())
                 .compact();
     }
 
-    public String extractRole(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignedKey())
+    public String getUsernameFromJwtToken(String token){
+        return Jwts.parser()
+                .verifyWith((SecretKey) getSignedKey())
                 .build()
-                .parseClaimsJwt(token)
-                .getBody()
-                .get("role")
-                .toString();
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    private Key getSignedKey() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    }
+
+    public boolean validateToken(String authToken){
+        try {
+            log.debug("Validate: {}", authToken);
+            Jwts.parser().verifyWith((SecretKey) getSignedKey()).build().parseSignedClaims(authToken);
+            return true;
+        }
+        catch (MalformedJwtException e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+        }
+        catch (ExpiredJwtException e) {
+            log.error("JWT token is expired: {}", e.getMessage());
+        }
+        catch (UnsupportedJwtException e) {
+            log.error("JWT token is unsupported: {}", e.getMessage());
+        }
+        catch (IllegalArgumentException e) {
+            log.error("JWT claims string is empty: {}", e.getMessage());
+        }
+        return false;
     }
 }
