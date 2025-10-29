@@ -2,6 +2,8 @@
 spring:
   application:
     name: user-service
+    secret: gdxsfgqaswfqywfuyhjcgxfwyasrdytqwredug246eewg67127t8y1812eetew73w6712671276
+    expiration: 86400000
 
   datasource:
     url: jdbc:mysql://localhost:3306/devpaydb
@@ -15,5 +17,8 @@ spring:
     show-sql: true
 
 logging:
+  level:
+    in.devpay: DEBUG   # 👈 this enables debug logs for your project packages
+    org.hibernate.SQL: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%Thread] %-5level %logger{36} - %msg%n"

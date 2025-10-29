@@ -31,6 +31,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserByUsername(String username) {
+        return repository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<User> getUserByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<User> getUserByPhone(String phone) {
+        return repository.findByPhone(phone);
+    }
+
+    @Override
+    public Optional<User> getUserByLogin(String login) {
+        return getUserByUsername(login)
+                .or(() -> getUserByPhone(login))
+                .or(() -> getUserByEmail(login));
+    }
+
+    @Override
     public List<User> getAllUsers() {
         return repository.findAll();
     }
@@ -45,5 +67,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(User user) {
         repository.delete(user);
+    }
+
+    @Override
+    public boolean isUsernameExist(String username) {
+        return repository.existsByUsername(username);
+    }
+
+    @Override
+    public boolean isEmailExist(String email) {
+        return repository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean isPhoneExist(String phone) {
+        return repository.existsByPhone(phone);
     }
 }

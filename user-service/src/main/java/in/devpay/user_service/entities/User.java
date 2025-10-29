@@ -1,6 +1,7 @@
 package in.devpay.user_service.entities;
 
 import in.devpay.user_service.dtos.GetUserResponse;
+import in.devpay.user_service.dtos.LoginResponse;
 import in.devpay.user_service.entities.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -57,6 +59,10 @@ public class User {
             if (sanitized.isEmpty()) {
                 sanitized = "user";
             }
+
+            if (this.id == null) {
+                throw new IllegalStateException("User ID must be generated before @PrePersist. Check persistence configuration.");
+            }
             String suffix = this.id.toString().substring(0, 8);
             this.username = sanitized + "_" + suffix;
         }
@@ -72,6 +78,20 @@ public class User {
                 .email(this.email)
                 .build();
     }
+
+    public LoginResponse toLoginResponse(String token, List<String> roles) {
+        return LoginResponse.builder()
+                .id(this.id)
+                .username(this.username)
+                .firstName(this.firstName)
+                .lastName(this.lastName)
+                .phone(this.phone)
+                .email(this.email)
+                .token(token)
+                .roles(roles)
+                .build();
+    }
+
 
 
 }
